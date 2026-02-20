@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Borrower, LoanTransaction, AppConfig, LoanEntry } from '../types';
 import { calculateTotalDue } from '../utils/loanCalculator';
 import { generateId } from '../utils/idGenerator';
@@ -400,7 +400,13 @@ const AppContext = createContext<{
 
 // Provider Component
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
-    // Lazy initialization to prevent overwriting localStorage on initial render
+    // Flag to track if initial cloud fetch has completed
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // API URL dynamically adapting to Env or relative path if deployed properly
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+    // Initialize from LocalStorage first (for instant offline cache reading)
     const [state, dispatch] = useReducer(appReducer, initialState, (defaultState) => {
         try {
             const saved = localStorage.getItem('web-pinjaman-data');
@@ -409,20 +415,57 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
                 return migrateState(parsed);
             }
         } catch (e) {
-            console.error("Failed to load state", e);
-            // Backup corrupt data just in case
-            const corruptData = localStorage.getItem('web-pinjaman-data');
-            if (corruptData) {
-                localStorage.setItem('web-pinjaman-data-corrupt', corruptData);
-            }
+            console.error("Failed to load local state", e);
         }
         return defaultState;
     });
 
-    // Save to local storage on change
+    // Fetch from Cloud Database on App Load
     useEffect(() => {
+        const fetchStateFromServer = async () => {
+            try {
+                const res = await fetch(`${API_URL}/state`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.transactions) {
+                        dispatch({ type: 'LOAD_STATE', payload: migrateState(data) });
+                    }
+                }
+            } catch (err) {
+                console.warn("Server belum ada atau bermasalah, memakai LocalStorage", err);
+            } finally {
+                // Ensure we know it has loaded (so we can start saving updates)
+                setIsLoaded(true);
+            }
+        };
+
+        fetchStateFromServer();
+    }, [API_URL]);
+
+    // Save to server AND local storage on state change
+    useEffect(() => {
+        // Tetap simpan ke LocalStorage agar lebih aman & cepat saat offline.
         localStorage.setItem('web-pinjaman-data', JSON.stringify(state));
-    }, [state]);
+
+        // JANGAN kirim state ke server SEBELUM kita selesai mendownload data terbaru
+        // dari server! (Mencegah kita malah mereplace data server dengan array kosong lokal).
+        if (!isLoaded) return;
+
+        // Tunda penyimpanan ke database (Debounce) untuk menghindari spam request
+        const saveTimeout = setTimeout(async () => {
+            try {
+                await fetch(`${API_URL}/state`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(state)
+                });
+            } catch (err) {
+                console.error("Gagal menyimpan data ke database server", err);
+            }
+        }, 1500); // 1.5 detik cooldown 
+
+        return () => clearTimeout(saveTimeout);
+    }, [state, isLoaded, API_URL]);
 
     // Google Sheets Auto Sync
     useEffect(() => {
@@ -441,3 +484,4 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useApp = () => useContext(AppContext);
+
