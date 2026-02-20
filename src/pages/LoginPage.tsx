@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Lock, User, Eye, EyeOff, ArrowLeft, ShieldCheck, Zap } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, ArrowLeft, ShieldCheck } from 'lucide-react';
 
 interface LoginPageProps {
     onBack: () => void;
@@ -135,36 +135,7 @@ export default function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
                         </button>
                     </form>
 
-                    {/* Demo Hint */}
-                    <div className="mt-6 pt-5 border-t border-slate-700/50">
-                        <p className="text-xs text-slate-500 text-center mb-3">Gunakan Akun Demo</p>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setUsername('admin');
-                                setPassword('admin123');
-                                showToast('Kredensial demo berhasil diisi', 'info');
-                            }}
-                            className="w-full relative overflow-hidden group rounded-lg transition-all hover:ring-2 hover:ring-blue-500/50"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <div className="bg-slate-800/80 rounded-lg p-3 space-y-1 relative border border-slate-700/50 group-hover:border-blue-500/30 transition-colors">
-                                <div className="absolute top-1/2 right-4 -translate-y-1/2 flex items-center gap-1.5 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 duration-300 pointer-events-none">
-                                    <span className="text-xs font-bold uppercase tracking-wider">Isi Otomatis</span>
-                                    <Zap size={14} className="fill-blue-500" />
-                                </div>
 
-                                <div className="flex justify-between text-xs pr-20 relative z-10 transition-transform group-hover:-translate-x-2 duration-300">
-                                    <span className="text-slate-400 group-hover:text-slate-300 transition-colors">Username</span>
-                                    <code className="text-blue-400 font-mono font-bold tracking-tight">admin</code>
-                                </div>
-                                <div className="flex justify-between text-xs pr-20 relative z-10 transition-transform group-hover:-translate-x-2 duration-300">
-                                    <span className="text-slate-400 group-hover:text-slate-300 transition-colors">Password</span>
-                                    <code className="text-blue-400 font-mono font-bold tracking-tight">admin123</code>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
