@@ -17,6 +17,15 @@ export default function ImportArrearsModal({ onClose }: ImportArrearsModalProps)
     const [previewData, setPreviewData] = useState<any[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    const parseNum = (val: any) => {
+        if (typeof val === 'number') return val;
+        if (typeof val === 'string') {
+            const cleaned = val.replace(/[^0-9]/g, '');
+            return cleaned ? parseInt(cleaned, 10) : 0;
+        }
+        return 0;
+    };
+
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -39,10 +48,15 @@ export default function ImportArrearsModal({ onClose }: ImportArrearsModalProps)
 
         try {
             previewData.forEach((row: any) => {
-                // Expected Columns: Nama, Kategori, Nominal, Bulan
+                // Expected Columns: Nama, Kategori, Pokok, Total, Bulan
                 const name = row['Nama'] || row['nama'] || row['Name'];
                 const categoryRaw = row['Kategori'] || row['kategori'] || 'Gaji';
-                const amount = row['Nominal'] || row['nominal'] || row['Amount'] || row['Total'] || 0;
+
+                const pokokRaw = row['Pokok'] || row['pokok'] || row['Nominal'] || 0;
+                const totalRaw = row['Total'] || row['total'] || row['Tagihan'] || row['tagihan'] || pokokRaw;
+
+                const amount = parseNum(pokokRaw);
+                const totalDue = parseNum(totalRaw);
                 const month = row['Bulan'] || row['bulan'] || row['Month'] || '-';
 
                 if (name && amount > 0) {
@@ -68,8 +82,8 @@ export default function ImportArrearsModal({ onClose }: ImportArrearsModalProps)
                         borrowerId: borrowerId,
                         borrowerName: name,
                         category: category as LoanCategory,
-                        totalPrincipal: Number(amount),
-                        totalDue: Number(amount),
+                        totalPrincipal: amount, // parsed number
+                        totalDue: totalDue, // parsed number
                         paidAmount: 0,
                         status: 'Belum Lunas' as const,
                         entries: [],
@@ -137,15 +151,19 @@ export default function ImportArrearsModal({ onClose }: ImportArrearsModalProps)
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-800">
-                                    {previewData.slice(0, 10).map((row, idx) => (
-                                        <tr key={idx}>
-                                            <td className="px-4 py-2">{row['Nama'] || row['nama']}</td>
-                                            <td className="px-4 py-2">{row['Kategori'] || row['kategori'] || 'Gaji'}</td>
-                                            <td className="px-4 py-2">{formatCurrency(row['Pokok'] || row['pokok'] || row['Nominal'] || 0)}</td>
-                                            <td className="px-4 py-2">{formatCurrency(row['Total'] || row['total'] || row['Tagihan'] || row['tagihan'] || row['Nominal'] || 0)}</td>
-                                            <td className="px-4 py-2">{row['Bulan'] || row['bulan']}</td>
-                                        </tr>
-                                    ))}
+                                    {previewData.slice(0, 10).map((row, idx) => {
+                                        const pokok = parseNum(row['Pokok'] || row['pokok'] || row['Nominal'] || 0);
+                                        const total = parseNum(row['Total'] || row['total'] || row['Tagihan'] || row['tagihan'] || pokok);
+                                        return (
+                                            <tr key={idx}>
+                                                <td className="px-4 py-2">{row['Nama'] || row['nama']}</td>
+                                                <td className="px-4 py-2">{row['Kategori'] || row['kategori'] || 'Gaji'}</td>
+                                                <td className="px-4 py-2">{formatCurrency(pokok)}</td>
+                                                <td className="px-4 py-2">{formatCurrency(total)}</td>
+                                                <td className="px-4 py-2">{row['Bulan'] || row['bulan']}</td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                             {previewData.length > 10 && (

@@ -42,6 +42,15 @@ export default function ImportHistoryModal({ onClose }: ImportHistoryModalProps)
         XLSX.writeFile(wb, "Template_Import_Pinjaman.xlsx");
     };
 
+    const parseNum = (val: any) => {
+        if (typeof val === 'number') return val;
+        if (typeof val === 'string') {
+            const cleaned = val.replace(/[^0-9]/g, '');
+            return cleaned ? parseInt(cleaned, 10) : 0;
+        }
+        return 0;
+    };
+
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -68,8 +77,9 @@ export default function ImportHistoryModal({ onClose }: ImportHistoryModalProps)
                 // Map Columns
                 const name = row['Nama'] || row['nama'] || row['Name'];
                 const dateRaw = row['Tanggal Pinjam'] || row['tanggal pinjam'] || row['Date'];
-                const amount = row['Jumlah Pinjam'] || row['jumlah pinjam'] || row['Nominal'] || 0;
-                const totalDue = row['Total Ganti'] || row['total ganti'] || row['Total'] || amount; // Fallback to amount if undefined
+                const amount = parseNum(row['Jumlah Pinjam'] || row['jumlah pinjam'] || row['Nominal'] || 0);
+                const totalDueRaw = row['Total Ganti'] || row['total ganti'] || row['Total'];
+                const totalDue = totalDueRaw !== undefined ? parseNum(totalDueRaw) : amount;
                 const statusRaw = row['Keterangan'] || row['keterangan'] || 'Lunas';
 
                 if (name && amount > 0) {
@@ -133,7 +143,7 @@ export default function ImportHistoryModal({ onClose }: ImportHistoryModalProps)
                         dueMonth: dueMonthStr,
                         createdAt: dateObj.toISOString(),
                         updatedAt: new Date().toISOString(),
-                        isArrear: status !== 'Lunas',
+                        isArrear: false,
                         isPriority: false
                     };
 
@@ -272,12 +282,16 @@ export default function ImportHistoryModal({ onClose }: ImportHistoryModalProps)
                                     {previewData.slice(0, 50).map((row, idx) => {
                                         const statusRaw = row['Keterangan'] || row['keterangan'] || 'Lunas';
                                         const isLunas = statusRaw.toLowerCase().includes('lunas') && !statusRaw.toLowerCase().includes('belum');
+                                        const amount = parseNum(row['Jumlah Pinjam'] || row['jumlah pinjam'] || row['Nominal'] || 0);
+                                        const totalDueRaw = row['Total Ganti'] || row['total ganti'] || row['Total'];
+                                        const totalDue = totalDueRaw !== undefined ? parseNum(totalDueRaw) : amount;
+
                                         return (
                                             <tr key={idx}>
                                                 <td className="px-4 py-2">{row['Nama'] || row['nama'] || row['Name']}</td>
                                                 <td className="px-4 py-2">{row['Tanggal Pinjam'] || row['tanggal pinjam'] || '-'}</td>
-                                                <td className="px-4 py-2">{formatCurrency(row['Jumlah Pinjam'] || row['jumlah pinjam'] || 0)}</td>
-                                                <td className="px-4 py-2">{formatCurrency(row['Total Ganti'] || row['total ganti'] || 0)}</td>
+                                                <td className="px-4 py-2">{formatCurrency(amount)}</td>
+                                                <td className="px-4 py-2">{formatCurrency(totalDue)}</td>
                                                 <td className="px-4 py-2 text-slate-400">{statusRaw}</td>
                                                 <td className="px-4 py-2">
                                                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${isLunas ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'

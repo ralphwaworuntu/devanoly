@@ -186,6 +186,31 @@ export default function LoanTable({ viewMode = 'all', selectedMonth, selectedYea
                                                         Import Tunggakan
                                                     </button>
                                                     <div className="h-px bg-slate-700 my-1" />
+                                                    <button
+                                                        onClick={() => {
+                                                            setIsMenuOpen(false);
+                                                            const allArrears = state.transactions.filter(t => t.isArrear);
+                                                            if (allArrears.length === 0) {
+                                                                showToast('Tidak ada data tunggakan untuk dihapus', 'info');
+                                                                return;
+                                                            }
+                                                            setConfirmModal({
+                                                                isOpen: true,
+                                                                title: 'Hapus Seluruh Tunggakan?',
+                                                                message: `Yakin ingin menghapus SELURUH data tunggakan (${allArrears.length} data)? Tindakan ini TIDAK BISA DIKEMBALIKAN.`,
+                                                                type: 'danger',
+                                                                onConfirm: () => {
+                                                                    const idsToDelete = allArrears.map(t => t.id);
+                                                                    dispatch({ type: 'DELETE_TRANSACTIONS_BATCH', payload: idsToDelete });
+                                                                    showToast(`${idsToDelete.length} data tunggakan berhasil dihapus`, 'warning');
+                                                                }
+                                                            });
+                                                        }}
+                                                        className="w-full text-left px-6 py-4 text-base font-semibold text-rose-400 hover:bg-rose-900/20 flex items-center gap-4 transition-colors"
+                                                    >
+                                                        <Trash2 size={20} className="text-rose-400" />
+                                                        Hapus Seluruh Tunggakan
+                                                    </button>
                                                 </>
                                             )}
 

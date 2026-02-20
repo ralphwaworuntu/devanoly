@@ -359,28 +359,31 @@ function appReducer(state: AppState, action: Action): AppState {
 
         case 'ADD_ARREAR_MANUAL': {
             const newArrear = action.payload;
-            // Find existing active arrear to merge
-            const existingIndex = state.transactions.findIndex(
-                t => t.isArrear && t.borrowerId === newArrear.borrowerId && t.status !== 'Lunas'
-            );
 
-            if (existingIndex >= 0) {
-                const existingTx = state.transactions[existingIndex];
-                const updatedTx = {
-                    ...existingTx,
-                    totalPrincipal: existingTx.totalPrincipal + newArrear.totalPrincipal,
-                    totalDue: existingTx.totalDue + newArrear.totalDue,
-                    entries: [...(existingTx.entries || []), ...(newArrear.entries || [])],
-                    updatedAt: new Date().toISOString(),
-                    // Optionally update dueMonth? Keeping original might be safer for "Start Date".
-                    // But if we want to show it's "updated", updatedAt handles that.
-                };
+            // Only attempt to merge if the incoming transaction is actually an arrear
+            if (newArrear.isArrear) {
+                // Find existing active arrear to merge
+                const existingIndex = state.transactions.findIndex(
+                    t => t.isArrear && t.borrowerId === newArrear.borrowerId && t.status !== 'Lunas'
+                );
 
-                const newTransactions = [...state.transactions];
-                newTransactions[existingIndex] = updatedTx;
-                return { ...state, transactions: newTransactions };
+                if (existingIndex >= 0) {
+                    const existingTx = state.transactions[existingIndex];
+                    const updatedTx = {
+                        ...existingTx,
+                        totalPrincipal: existingTx.totalPrincipal + newArrear.totalPrincipal,
+                        totalDue: existingTx.totalDue + newArrear.totalDue,
+                        entries: [...(existingTx.entries || []), ...(newArrear.entries || [])],
+                        updatedAt: new Date().toISOString(),
+                    };
+
+                    const newTransactions = [...state.transactions];
+                    newTransactions[existingIndex] = updatedTx;
+                    return { ...state, transactions: newTransactions };
+                }
             }
 
+            // Normal fallback or if it's not an arrear
             return { ...state, transactions: [newArrear, ...state.transactions] };
         }
 
