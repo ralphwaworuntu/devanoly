@@ -1,0 +1,328 @@
+import React from 'react';
+import { useApp } from '../context/AppContext';
+import { Settings, Calendar, Percent, UploadCloud, Link, X } from 'lucide-react';
+
+export default function SetupPanel() {
+    const { state, dispatch } = useApp();
+    const { config } = state;
+
+    // Helper to Sort Months Chronologically
+    const sortMonths = (months: string[]) => {
+        const monthsList = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        return [...months].sort((a, b) => {
+            const [monthA, yearA] = a.split(' ');
+            const [monthB, yearB] = b.split(' ');
+
+            if (yearA !== yearB) {
+                return (parseInt(yearA) || 0) - (parseInt(yearB) || 0);
+            }
+            return monthsList.indexOf(monthA) - monthsList.indexOf(monthB);
+        });
+    };
+
+    const sortedAvailableMonths = sortMonths(config.availableMonths || []);
+
+    return (
+        <div className="card-glass p-6">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                    <Settings size={24} />
+                </div>
+                <h3 className="text-xl font-bold">Pengaturan Sistem</h3>
+            </div>
+
+            <div className="space-y-8">
+                {/* Cycle Selection */}
+                <div className="space-y-3">
+                    <label className="text-slate-400 text-sm font-medium">Siklus Aktif Dashboard</label>
+                    <div className="segmented-control">
+                        <button
+                            onClick={() => dispatch({ type: 'UPDATE_CONFIG', payload: { activeCycle: 'Gaji' } })}
+                            className={`flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all duration-300 ${config.activeCycle === 'Gaji'
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                                }`}
+                        >
+                            Gaji (Tgl 1)
+                        </button>
+                        <button
+                            onClick={() => dispatch({ type: 'UPDATE_CONFIG', payload: { activeCycle: 'Remon' } })}
+                            className={`flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all duration-300 ${config.activeCycle === 'Remon'
+                                ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20'
+                                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                                }`}
+                        >
+                            Remon
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Gaji Settings */}
+                    <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-900/5 space-y-4">
+                        <h4 className="font-bold text-blue-400 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                            Pengaturan Siklus Gaji
+                        </h4>
+
+                        <div className="space-y-2">
+                            <label className="text-slate-400 text-xs uppercase font-bold">Bulan Aktif</label>
+                            <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700 p-2 rounded-lg">
+                                <Calendar size={18} className="text-blue-500 ml-2" />
+                                <select
+                                    value={config.activeMonthGaji}
+                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => dispatch({ type: 'UPDATE_CONFIG', payload: { activeMonthGaji: e.target.value } })}
+                                    className="bg-transparent border-none focus:ring-0 text-slate-200 w-full text-sm font-medium [&>option]:bg-slate-900 [&>option]:text-slate-200"
+                                >
+                                    {sortedAvailableMonths.map(m => (
+                                        <option key={m} value={m}>{m}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-slate-400 text-xs uppercase font-bold">Bunga Default</label>
+                            <div className="flex items-center gap-4 bg-slate-900/50 border border-slate-700 p-3 rounded-lg">
+                                <Percent size={20} className="text-blue-500" />
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="rateGaji"
+                                            checked={config.interestRateGaji === 10}
+                                            onChange={() => dispatch({ type: 'UPDATE_CONFIG', payload: { interestRateGaji: 10 } })}
+                                            className="w-4 h-4 text-blue-500 bg-slate-800 border-slate-600 focus:ring-blue-500 focus:ring-2"
+                                        />
+                                        <span className="text-slate-200">10%</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="rateGaji"
+                                            checked={config.interestRateGaji === 20}
+                                            onChange={() => dispatch({ type: 'UPDATE_CONFIG', payload: { interestRateGaji: 20 } })}
+                                            className="w-4 h-4 text-blue-500 bg-slate-800 border-slate-600 focus:ring-blue-500 focus:ring-2"
+                                        />
+                                        <span className="text-slate-200">20%</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Remon Settings */}
+                    <div className="p-4 rounded-xl border border-purple-500/20 bg-purple-900/5 space-y-4">
+                        <h4 className="font-bold text-purple-400 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                            Pengaturan Siklus Remon
+                        </h4>
+
+                        <div className="space-y-2">
+                            <label className="text-slate-400 text-xs uppercase font-bold">Bulan Aktif</label>
+                            <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700 p-2 rounded-lg">
+                                <Calendar size={18} className="text-purple-500 ml-2" />
+                                <select
+                                    value={config.activeMonthRemon}
+                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => dispatch({ type: 'UPDATE_CONFIG', payload: { activeMonthRemon: e.target.value } })}
+                                    className="bg-transparent border-none focus:ring-0 text-slate-200 w-full text-sm font-medium [&>option]:bg-slate-900 [&>option]:text-slate-200"
+                                >
+                                    {sortedAvailableMonths.map(m => (
+                                        <option key={m} value={m}>{m}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-slate-400 text-xs uppercase font-bold">Bunga Default</label>
+                            <div className="flex items-center gap-4 bg-slate-900/50 border border-slate-700 p-3 rounded-lg">
+                                <Percent size={20} className="text-purple-500" />
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="rateRemon"
+                                            checked={config.interestRateRemon === 10}
+                                            onChange={() => dispatch({ type: 'UPDATE_CONFIG', payload: { interestRateRemon: 10 } })}
+                                            className="w-4 h-4 text-purple-500 bg-slate-800 border-slate-600 focus:ring-purple-500 focus:ring-2"
+                                        />
+                                        <span className="text-slate-200">10%</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="rateRemon"
+                                            checked={config.interestRateRemon === 20}
+                                            onChange={() => dispatch({ type: 'UPDATE_CONFIG', payload: { interestRateRemon: 20 } })}
+                                            className="w-4 h-4 text-purple-500 bg-slate-800 border-slate-600 focus:ring-purple-500 focus:ring-2"
+                                        />
+                                        <span className="text-slate-200">20%</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Google Sheets Sync Settings */}
+                <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-900/5 space-y-4">
+                    <div className="flex justify-between items-center">
+                        <h4 className="font-bold text-emerald-400 flex items-center gap-2">
+                            <UploadCloud size={20} />
+                            Google Sheets Sync (Backup)
+                        </h4>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={config.enableAutoSync || false}
+                                onChange={(e) => dispatch({ type: 'UPDATE_CONFIG', payload: { enableAutoSync: e.target.checked } })}
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                            <span className="ml-3 text-sm font-medium text-slate-300">Auto Sync</span>
+                        </label>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-slate-400 text-xs uppercase font-bold">Google Apps Script Web App URL</label>
+                        <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700 p-2 rounded-lg">
+                            <Link size={18} className="text-emerald-500 ml-2 shrink-0" />
+                            <input
+                                type="text"
+                                placeholder="https://script.google.com/macros/s/..."
+                                value={config.googleScriptUrl || ''}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'UPDATE_CONFIG', payload: { googleScriptUrl: e.target.value } })}
+                                className="bg-transparent border-none focus:ring-0 text-slate-200 w-full text-sm font-medium"
+                            />
+                        </div>
+                        <p className="text-xs text-slate-500">
+                            Masukkan URL Web App dari Google Apps Script untuk sinkronisasi otomatis.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Data Master: Month Management */}
+                <div className="p-4 rounded-xl border border-slate-700 bg-slate-800/30 space-y-4">
+                    <h4 className="font-bold text-slate-300 flex items-center gap-2">
+                        <Calendar size={20} className="text-slate-400" />
+                        Manajemen Daftar Bulan
+                    </h4>
+                    <p className="text-xs text-slate-500">Tambahkan bulan baru ke dalam daftar agar bisa dipilih sebagai bulan aktif.</p>
+
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            id="newMonthInput"
+                            placeholder="Contoh: Mei 2026"
+                            className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                        />
+                        <button
+                            onClick={() => {
+                                const input = document.getElementById('newMonthInput') as HTMLInputElement;
+                                const val = input.value.trim();
+                                if (!val) return;
+
+                                const currentMonths = config.availableMonths || [];
+                                if (currentMonths.includes(val)) {
+                                    alert('Bulan sudah ada!');
+                                    return;
+                                }
+
+                                dispatch({
+                                    type: 'UPDATE_CONFIG',
+                                    payload: { availableMonths: [...currentMonths, val].sort() }
+                                });
+                                input.value = '';
+                            }}
+                            className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all"
+                        >
+                            Tambah
+                        </button>
+                    </div>
+
+                    {/* Quick Add Year Button */}
+                    <div className="flex items-center gap-2 justify-end mt-2 animate-in fade-in slide-in-from-right-4">
+                        <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1">
+                            <span className="text-xs text-slate-400">Tahun:</span>
+                            <input
+                                type="number"
+                                defaultValue={new Date().getFullYear()}
+                                id="yearInput"
+                                className="bg-transparent w-16 text-sm text-white focus:outline-none border-none p-0 appearance-none"
+                            />
+                        </div>
+                        <button
+                            onClick={() => {
+                                const yearInput = document.getElementById('yearInput') as HTMLInputElement;
+                                const year = yearInput.value;
+                                if (!year) return;
+
+                                const monthsList = [
+                                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                                ];
+
+                                const newMonths = monthsList.map(m => `${m} ${year}`);
+                                const currentMonths = config.availableMonths || [];
+
+                                // Merge and Dedup
+                                const uniqueMonths = Array.from(new Set([...currentMonths, ...newMonths]));
+
+                                // Chronological Sort
+                                const sortedMonths = uniqueMonths.sort((a, b) => {
+                                    const [monthA, yearA] = a.split(' ');
+                                    const [monthB, yearB] = b.split(' ');
+
+                                    if (yearA !== yearB) {
+                                        return parseInt(yearA) - parseInt(yearB);
+                                    }
+                                    return monthsList.indexOf(monthA) - monthsList.indexOf(monthB);
+                                });
+
+                                dispatch({
+                                    type: 'UPDATE_CONFIG',
+                                    payload: { availableMonths: sortedMonths }
+                                });
+                                alert(`Bulan untuk tahun ${year} berhasil ditambahkan dan diurutkan!`);
+                            }}
+                            className="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 hover:text-blue-300 border border-blue-600/30 px-3 py-1.5 rounded-lg transition-all"
+                        >
+                            + Generate Full Tahun
+                        </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        {sortedAvailableMonths.map(m => (
+                            <div key={m} className="pl-3 pr-1 py-1 bg-slate-900 rounded-full border border-slate-700 text-xs text-slate-300 flex items-center gap-1 group hover:border-slate-500 transition-colors">
+                                {m}
+                                <button
+                                    onClick={() => {
+                                        if (m === config.activeMonthGaji || m === config.activeMonthRemon) {
+                                            alert(`Tidak dapat menghapus bulan ${m} karena sedang aktif digunakan!`);
+                                            return;
+                                        }
+                                        if (window.confirm(`Hapus ${m} dari daftar?`)) {
+                                            const newMonths = (config.availableMonths || []).filter(month => month !== m);
+                                            dispatch({
+                                                type: 'UPDATE_CONFIG',
+                                                payload: { availableMonths: newMonths }
+                                            });
+                                        }
+                                    }}
+                                    className="p-1 hover:bg-rose-500 hover:text-white rounded-full text-slate-500 transition-colors opacity-0 group-hover:opacity-100"
+                                    title="Hapus Bulan"
+                                >
+                                    <X size={12} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

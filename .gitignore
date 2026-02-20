@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+*.log
+tsc_err*.txt
+tsc_out.log
+build_error.log
+error.log
