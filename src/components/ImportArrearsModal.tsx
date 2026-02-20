@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
-import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, Upload, FileSpreadsheet, CheckCircle2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { formatCurrency } from '../utils/loanCalculator';
 import { generateId } from '../utils/idGenerator';

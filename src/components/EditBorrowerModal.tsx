@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
-import { X, Save, User, Wallet } from 'lucide-react';
+import { X, Save, User } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 
 interface EditBorrowerModalProps {

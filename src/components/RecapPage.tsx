@@ -4,7 +4,7 @@ import { LoanTransaction } from '../types';
 import { formatCurrency } from '../utils/loanCalculator';
 import { FileText, TrendingUp, Wallet, Calendar, Users, Filter } from 'lucide-react';
 
-type TimeFrame = 'Monthly' | 'AllTime';
+
 
 export default function RecapPage() {
     const { state } = useApp();
