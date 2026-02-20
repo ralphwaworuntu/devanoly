@@ -83,9 +83,6 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
                             Masuk ke Dashboard
                             <ArrowRight size={18} />
                         </button>
-                        <button className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-8 py-3.5 rounded-xl border border-slate-700 transition-all text-base">
-                            Lihat Demo
-                        </button>
                     </div>
                 </div>
             </section>
