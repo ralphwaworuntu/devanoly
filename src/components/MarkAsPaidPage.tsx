@@ -200,17 +200,17 @@ export default function MarkAsPaidPage() {
                                             {tx.borrowerName.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-1 sm:gap-0">
-                                                <h4 className="font-bold text-slate-200 text-base sm:text-lg truncate" title={tx.borrowerName}>
-                                                    {tx.borrowerName}
-                                                </h4>
-                                                <span className={`font-bold text-base sm:text-lg whitespace-nowrap sm:ml-2 ${isLunas ? 'text-emerald-400 line-through opacity-70' : 'text-rose-400'}`}>
+                                            <h4 className="font-bold text-slate-200 text-base sm:text-lg truncate mb-1" title={tx.borrowerName}>
+                                                {tx.borrowerName}
+                                            </h4>
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className={`font-bold text-base sm:text-lg ${isLunas ? 'text-emerald-400 line-through opacity-70' : 'text-rose-400'}`}>
                                                     {formatCurrency(tx.totalDue)}
                                                 </span>
+                                                <p className="text-slate-400 text-xs sm:text-sm">
+                                                    Cair: {formatCurrency(tx.totalPrincipal)}
+                                                </p>
                                             </div>
-                                            <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
-                                                Cair: {formatCurrency(tx.totalPrincipal)}
-                                            </p>
                                             <div className="flex flex-wrap gap-2 items-center mt-2">
                                                 <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${tx.category === 'Gaji'
                                                     ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
