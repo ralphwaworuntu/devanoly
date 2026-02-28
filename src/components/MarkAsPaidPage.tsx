@@ -105,9 +105,12 @@ export default function MarkAsPaidPage() {
                         </h3>
                         <p className="text-slate-400 text-sm mt-1">Centang untuk melunasi seluruh tagihan sekaligus.</p>
                     </div>
+                </div>
 
-                    <div className="flex items-center gap-4 w-full xl:w-auto overflow-hidden order-last xl:order-none">
-                        <div className="relative flex-1 md:w-64">
+                <div className="flex flex-col-reverse xl:flex-row gap-6">
+                    {/* Search Bar - This will be at the bottom on mobile due to flex-col-reverse */}
+                    <div className="flex items-center gap-4 w-full xl:w-min overflow-hidden">
+                        <div className="relative flex-1 xl:w-64">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                             <input
                                 type="text"
@@ -118,65 +121,66 @@ export default function MarkAsPaidPage() {
                             />
                         </div>
                     </div>
-                </div>
 
-                <div className="bg-slate-950/30 p-4 rounded-xl border border-white/5 space-y-4 xl:space-y-0 xl:flex xl:items-center xl:gap-6 flex flex-col xl:flex-row">
-                    {/* Category Filter */}
-                    <div className="flex items-center gap-4 w-full xl:w-auto">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest hidden xl:block">Filter:</span>
-                        <div className="flex-1 grid grid-cols-3 gap-1 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
-                            {(['Semua', 'Gaji', 'Remon'] as const).map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setSelectedCategory(cat)}
-                                    className={`flex items-center justify-center px-2 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${selectedCategory === cat
-                                        ? cat === 'Gaji' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                                            : cat === 'Remon' ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20'
-                                                : 'bg-slate-600 text-white shadow-md'
-                                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
+                    {/* Filters - This will be at the top on mobile due to flex-col-reverse */}
+                    <div className="bg-slate-950/30 p-4 rounded-xl border border-white/5 space-y-4 xl:space-y-0 flex-1 flex flex-col xl:flex-row xl:items-center xl:gap-6">
+                        {/* Category Filter */}
+                        <div className="flex items-center gap-4 w-full xl:w-auto">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest hidden xl:block">Filter:</span>
+                            <div className="flex-1 grid grid-cols-3 gap-1 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
+                                {(['Semua', 'Gaji', 'Remon'] as const).map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`flex items-center justify-center px-2 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${selectedCategory === cat
+                                            ? cat === 'Gaji' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                                                : cat === 'Remon' ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20'
+                                                    : 'bg-slate-600 text-white shadow-md'
+                                            : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="w-px h-8 bg-slate-700 hidden xl:block" />
+                        <div className="w-px h-8 bg-slate-700 hidden xl:block" />
 
-                    {/* Sort Filter */}
-                    <div className="flex-1 relative w-full xl:w-48">
-                        <ArrowUpDown size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <select
-                            value={`${sortConfig.key}-${sortConfig.direction}`}
-                            onChange={(e) => {
-                                const [key, direction] = e.target.value.split('-');
-                                setSortConfig({ key: key as 'name' | 'date', direction: direction as 'asc' | 'desc' });
-                            }}
-                            className="input-field pl-9 py-2 text-base font-medium w-full appearance-none cursor-pointer"
-                        >
-                            <option value="name-asc">Nama (A-Z)</option>
-                            <option value="name-desc">Nama (Z-A)</option>
-                            <option value="date-desc">Pinjaman Baru</option>
-                            <option value="date-asc">Pinjaman Lama</option>
-                        </select>
-                    </div>
+                        {/* Sort Filter */}
+                        <div className="relative w-full xl:w-48">
+                            <ArrowUpDown size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <select
+                                value={`${sortConfig.key}-${sortConfig.direction}`}
+                                onChange={(e) => {
+                                    const [key, direction] = e.target.value.split('-');
+                                    setSortConfig({ key: key as 'name' | 'date', direction: direction as 'asc' | 'desc' });
+                                }}
+                                className="input-field pl-9 py-2 text-base font-medium w-full appearance-none cursor-pointer"
+                            >
+                                <option value="name-asc">Nama (A-Z)</option>
+                                <option value="name-desc">Nama (Z-A)</option>
+                                <option value="date-desc">Pinjaman Baru</option>
+                                <option value="date-asc">Pinjaman Lama</option>
+                            </select>
+                        </div>
 
-                    <div className="w-px h-8 bg-slate-700 hidden xl:block" />
+                        <div className="w-px h-8 bg-slate-700 hidden xl:block" />
 
-                    {/* Month Filter */}
-                    <div className="flex-1 relative w-full xl:w-64">
-                        <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <select
-                            value={selectedMonth}
-                            onChange={(e) => setSelectedMonth(e.target.value)}
-                            className="input-field pl-9 py-2 text-base font-medium w-full appearance-none cursor-pointer"
-                        >
-                            <option value="Semua">Semua Bulan</option>
-                            {state.config.availableMonths?.map(month => (
-                                <option key={month} value={month}>{month}</option>
-                            ))}
-                        </select>
+                        {/* Month Filter */}
+                        <div className="relative w-full xl:w-64">
+                            <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <select
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                className="input-field pl-9 py-2 text-base font-medium w-full appearance-none cursor-pointer"
+                            >
+                                <option value="Semua">Semua Bulan</option>
+                                {state.config.availableMonths?.map(month => (
+                                    <option key={month} value={month}>{month}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
