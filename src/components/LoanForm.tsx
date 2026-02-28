@@ -48,13 +48,24 @@ export default function LoanForm() {
         if (!borrower) return null;
 
         // Hitung hutang berjalan (Global: Gaji + Remon) -> BERDASARKAN TOTAL POKOK (PRINCIPAL)
-        const currentPrincipalDebt = state.transactions
-            .filter((t: LoanTransaction) => t.borrowerId === selectedBorrowerId && t.status !== 'Lunas')
-            .reduce((sum: number, t: LoanTransaction) => sum + t.totalPrincipal, 0);
+        const activeTransactions = state.transactions.filter((t: LoanTransaction) => t.borrowerId === selectedBorrowerId && t.status !== 'Lunas');
+
+        const currentPrincipalDebt = activeTransactions.reduce((sum: number, t: LoanTransaction) => sum + t.totalPrincipal, 0);
+
+        // Hitung total tagihan aktif KHUSUS untuk bulan dan kategori yang dipilih
+        const currentTotalDueOnMonth = activeTransactions
+            .filter((t: LoanTransaction) => t.category === category && t.dueMonth === activeMonth)
+            .reduce((sum: number, t: LoanTransaction) => sum + (t.totalDue - t.paidAmount), 0);
 
         const newPrincipal = Number(amount);
         const projectedTotalPrincipal = currentPrincipalDebt + newPrincipal;
         const isOverLimit = projectedTotalPrincipal > borrower.limit;
+
+        // Simulasi tagihan baru (Pokok + Bunga)
+        const newLoanDueAmount = newPrincipal + (newPrincipal * (interestRate / 100));
+
+        // Total akumulasi tagihan di bulan ini
+        const totalPaymentDue = currentTotalDueOnMonth + newLoanDueAmount;
 
         return {
             borrower,
@@ -62,9 +73,14 @@ export default function LoanForm() {
             newLoanTotalDue: newPrincipal, // Label as "Pinjaman Baru (Pokok)"
             projectedTotalDebt: projectedTotalPrincipal,
             isOverLimit,
-            remainingLimit: borrower.limit - currentPrincipalDebt
+            remainingLimit: borrower.limit - currentPrincipalDebt,
+
+            // New fields for payment simulation
+            currentTotalDueOnMonth,
+            newLoanDueAmount,
+            totalPaymentDue
         };
-    }, [selectedBorrowerId, amount, state, interestRate]);
+    }, [selectedBorrowerId, amount, state.transactions, state.borrowers, interestRate, category, activeMonth]);
 
     const executeLoanTransaction = () => {
         dispatch({
@@ -206,35 +222,56 @@ export default function LoanForm() {
                         <div className={`p-4 rounded-xl border ${limitGuard.isOverLimit ? 'bg-rose-500/10 border-rose-500/20' : 'bg-slate-800/50 border-slate-700'}`}>
                             <h4 className="text-sm font-bold text-slate-300 mb-3 border-b border-slate-700/50 pb-2">Simulasi Perhitungan {category}</h4>
 
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">Total Pokok Berjalan:</span>
-                                    <span className="font-medium text-slate-200">{formatCurrency(limitGuard.currentDebt)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">Pinjaman Baru (Pokok):</span>
-                                    <span className={`font-medium ${category === 'Gaji' ? 'text-blue-400' : 'text-purple-400'}`}>+ {formatCurrency(limitGuard.newLoanTotalDue)}</span>
-                                </div>
-                                <div className="flex justify-between pt-2 border-t border-slate-700/50">
-                                    <span className="text-slate-200 font-bold">Total Akumulasi:</span>
-                                    <span className={`font-bold ${limitGuard.isOverLimit ? 'text-rose-400' : 'text-emerald-400'}`}>
-                                        {formatCurrency(limitGuard.projectedTotalDebt)}
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between text-xs mt-1">
-                                    <span className="text-slate-500">Limit Kredit:</span>
-                                    <span className="text-slate-400">{formatCurrency(limitGuard.borrower.limit)}</span>
-                                </div>
-
-                                {limitGuard.isOverLimit && (
-                                    <div className="flex items-start gap-2 mt-3 text-rose-400 bg-rose-950/30 p-2 rounded-lg">
-                                        <AlertTriangle size={16} className="mt-0.5" />
-                                        <p className="text-xs leading-relaxed">
-                                            <strong>Over Limit Warning:</strong> Total hutang melebihi limit yang ditentukan. Persetujuan manual diperlukan.
-                                        </p>
+                            <div className="space-y-4">
+                                {/* Limit Calculation Section */}
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">Total Pokok Berjalan:</span>
+                                        <span className="font-medium text-slate-200">{formatCurrency(limitGuard.currentDebt)}</span>
                                     </div>
-                                )}
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">Pinjaman Baru (Pokok):</span>
+                                        <span className={`font-medium ${category === 'Gaji' ? 'text-blue-400' : 'text-purple-400'}`}>+ {formatCurrency(limitGuard.newLoanTotalDue)}</span>
+                                    </div>
+                                    <div className="flex justify-between pt-2 border-t border-slate-700/50">
+                                        <span className="text-slate-200 font-bold">Total Akumulasi Pokok:</span>
+                                        <span className={`font-bold ${limitGuard.isOverLimit ? 'text-rose-400' : 'text-slate-200'}`}>
+                                            {formatCurrency(limitGuard.projectedTotalDebt)}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between text-xs mt-1">
+                                        <span className="text-slate-500">Limit Kredit:</span>
+                                        <span className="text-slate-400">{formatCurrency(limitGuard.borrower.limit)}</span>
+                                    </div>
+
+                                    {limitGuard.isOverLimit && (
+                                        <div className="flex items-start gap-2 mt-3 text-rose-400 bg-rose-950/30 p-2 rounded-lg">
+                                            <AlertTriangle size={16} className="mt-0.5" />
+                                            <p className="text-xs leading-relaxed">
+                                                <strong>Over Limit Warning:</strong> Total pokok pinjaman melebihi limit yang ditentukan. Persetujuan manual diperlukan.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Payment Simulation Section */}
+                                <div className="space-y-2 text-sm pt-4 border-t border-slate-700/50">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">Tagihan Aktif pada {category} {activeMonth}:</span>
+                                        <span className="font-medium text-slate-200">{formatCurrency(limitGuard.currentTotalDueOnMonth)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">Tagihan Pinjaman Baru (Pokok+Bunga):</span>
+                                        <span className={`font-medium ${category === 'Gaji' ? 'text-blue-400' : 'text-purple-400'}`}>+ {formatCurrency(limitGuard.newLoanDueAmount)}</span>
+                                    </div>
+                                    <div className="flex justify-between pt-2 border-t border-slate-700/50">
+                                        <span className="text-amber-400 font-bold uppercase text-xs sm:text-sm tracking-wider">Total Harus Dibayar ({activeMonth}):</span>
+                                        <span className="font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                                            {formatCurrency(limitGuard.totalPaymentDue)}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
