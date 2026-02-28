@@ -86,11 +86,16 @@ export default function ExportPdfModal({ isOpen, onClose }: ExportPdfModalProps)
             // Sub-header stats
             const totalPinjaman = filteredTransactions.reduce((sum, t) => sum + t.totalPrincipal, 0);
             const totalTagihan = filteredTransactions.reduce((sum, t) => sum + t.totalDue, 0);
+            const totalSisa = filteredTransactions.reduce((sum, t) => sum + (t.totalDue - t.paidAmount), 0);
             const totalProfit = totalTagihan - totalPinjaman;
 
             doc.setFontSize(10);
             doc.text(`Total Pinjaman: ${formatCurrency(totalPinjaman)}`, 200, 22, { align: 'right' });
             doc.text(`Total Profit: ${formatCurrency(totalProfit)}`, 200, 28, { align: 'right' });
+
+            doc.setFont("helvetica", "bold");
+            doc.text(`Total yang Harus Dibayar: ${formatCurrency(totalSisa)}`, 200, 34, { align: 'right' });
+            doc.setFont("helvetica", "normal");
 
             // Table Columns
             const tableColumn = ["No", "Nama", "Kategori", "Status", "Pinjaman", "Bunga", "Total Tagihan", "Terbayar", "Sisa"];
