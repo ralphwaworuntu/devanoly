@@ -193,23 +193,25 @@ export default function MarkAsPaidPage() {
                             onClick={() => handleTogglePaidClick(tx.id, isLunas, tx.totalDue, tx.borrowerName)}
                             style={{ cursor: 'pointer' }}
                         >
-                            <div className="p-5 flex flex-col h-full gap-4">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-start gap-4 flex-1">
-                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0 shadow-lg ${tx.category === 'Gaji' ? 'bg-blue-600 shadow-blue-500/20' : 'bg-purple-600 shadow-purple-500/20'}`}>
+                            <div className="p-4 sm:p-5 flex flex-col h-full gap-4">
+                                <div className="flex justify-between items-start gap-3">
+                                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-lg font-bold text-white shrink-0 shadow-lg ${tx.category === 'Gaji' ? 'bg-blue-600 shadow-blue-500/20' : 'bg-purple-600 shadow-purple-500/20'}`}>
                                             {tx.borrowerName.charAt(0).toUpperCase()}
                                         </div>
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-center w-full">
-                                                <h4 className="font-bold text-slate-200 text-lg line-clamp-1">{tx.borrowerName}</h4>
-                                                <span className={`font-bold text-lg whitespace-nowrap ml-2 ${isLunas ? 'text-emerald-400 line-through opacity-70' : 'text-rose-400'}`}>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-1 sm:gap-0">
+                                                <h4 className="font-bold text-slate-200 text-base sm:text-lg truncate" title={tx.borrowerName}>
+                                                    {tx.borrowerName}
+                                                </h4>
+                                                <span className={`font-bold text-base sm:text-lg whitespace-nowrap sm:ml-2 ${isLunas ? 'text-emerald-400 line-through opacity-70' : 'text-rose-400'}`}>
                                                     {formatCurrency(tx.totalDue)}
                                                 </span>
                                             </div>
-                                            <p className="text-slate-400 text-sm mt-0.5">
+                                            <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
                                                 Cair: {formatCurrency(tx.totalPrincipal)}
                                             </p>
-                                            <div className="flex gap-2 items-center mt-2">
+                                            <div className="flex flex-wrap gap-2 items-center mt-2">
                                                 <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${tx.category === 'Gaji'
                                                     ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                                                     : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
@@ -220,12 +222,12 @@ export default function MarkAsPaidPage() {
                                         </div>
                                     </div>
                                     <button
-                                        className={`shrink-0 transition-colors p-1 rounded-full ml-3 ${isLunas ? 'text-emerald-500' : 'text-slate-600 group-hover:text-blue-400'}`}
+                                        className={`shrink-0 transition-colors p-1 rounded-full ${isLunas ? 'text-emerald-500' : 'text-slate-600 group-hover:text-blue-400'}`}
                                     >
                                         {isLunas ? (
-                                            <CheckCircle size={28} className="fill-emerald-500/20" />
+                                            <CheckCircle size={28} className="fill-emerald-500/20 w-6 h-6 sm:w-7 sm:h-7" />
                                         ) : (
-                                            <Circle size={28} />
+                                            <Circle size={28} className="w-6 h-6 sm:w-7 sm:h-7" />
                                         )}
                                     </button>
                                 </div>
