@@ -94,7 +94,7 @@ export default function MarkAsPaidPage() {
 
     return (
         <div className="space-y-6">
-            <div className="card-glass p-6 border-b border-slate-700/50 space-y-6">
+            <div className="card-glass p-6 border-b border-slate-700/50 space-y-6 flex flex-col">
                 <div className="flex flex-col xl:flex-row justify-between xl:items-center gap-6">
                     <div>
                         <h3 className="text-xl font-bold flex items-center gap-2">
@@ -106,7 +106,7 @@ export default function MarkAsPaidPage() {
                         <p className="text-slate-400 text-sm mt-1">Centang untuk melunasi seluruh tagihan sekaligus.</p>
                     </div>
 
-                    <div className="flex items-center gap-4 w-full xl:w-auto overflow-hidden">
+                    <div className="flex items-center gap-4 w-full xl:w-auto overflow-hidden order-last xl:order-none">
                         <div className="relative flex-1 md:w-64">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                             <input
@@ -120,7 +120,7 @@ export default function MarkAsPaidPage() {
                     </div>
                 </div>
 
-                <div className="bg-slate-950/30 p-4 rounded-xl border border-white/5 space-y-4 xl:space-y-0 xl:flex xl:items-center xl:gap-6">
+                <div className="bg-slate-950/30 p-4 rounded-xl border border-white/5 space-y-4 xl:space-y-0 xl:flex xl:items-center xl:gap-6 flex flex-col xl:flex-row">
                     {/* Category Filter */}
                     <div className="flex items-center gap-4 w-full xl:w-auto">
                         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest hidden xl:block">Filter:</span>
