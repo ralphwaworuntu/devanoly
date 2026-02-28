@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import { generateId } from '../utils/idGenerator';
@@ -21,6 +22,14 @@ export default function ExcelImportModal({ onClose }: ExcelImportModalProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [previewData, setPreviewData] = useState<any[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Lock background scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -88,8 +97,8 @@ export default function ExcelImportModal({ onClose }: ExcelImportModalProps) {
         window.XLSX.writeFile(wb, "Template_Import_Peminjam.xlsx");
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    return createPortal(
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl relative">
                 <button
                     onClick={onClose}
@@ -175,6 +184,7 @@ export default function ExcelImportModal({ onClose }: ExcelImportModalProps) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

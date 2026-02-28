@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
@@ -21,6 +21,14 @@ export default function ImportHistoryModal({ onClose }: ImportHistoryModalProps)
     const [selectedCategory, setSelectedCategory] = useState<LoanCategory>('Gaji');
     const [selectedMonth, setSelectedMonth] = useState<string>('Januari');
     const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+
+    // Lock background scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     const months = [
         'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -193,7 +201,7 @@ export default function ImportHistoryModal({ onClose }: ImportHistoryModalProps)
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
             <div className="card-glass w-full max-w-4xl p-6 relative flex flex-col max-h-[90vh]">
                 <button
                     onClick={onClose}

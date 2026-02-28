@@ -23,13 +23,19 @@ export default function ConfirmationModal({
     confirmText = 'Ya, Lanjutkan',
     cancelText = 'Batal'
 }: ConfirmationModalProps) {
-    // Close on Escape key
+    // Close on Escape key and lock scroll
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
         };
-        if (isOpen) window.addEventListener('keydown', handleEsc);
-        return () => window.removeEventListener('keydown', handleEsc);
+        if (isOpen) {
+            window.addEventListener('keydown', handleEsc);
+            document.body.style.overflow = 'hidden';
+        }
+        return () => {
+            window.removeEventListener('keydown', handleEsc);
+            document.body.style.overflow = 'unset';
+        };
     }, [isOpen, onClose]);
 
     if (!isOpen) return null;
@@ -74,7 +80,7 @@ export default function ConfirmationModal({
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div
                 className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200"
                 onClick={onClose}

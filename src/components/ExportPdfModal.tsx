@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
@@ -26,6 +26,14 @@ export default function ExportPdfModal({ isOpen, onClose }: ExportPdfModalProps)
     });
     const [priorityOnly, setPriorityOnly] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+
+    // Lock background scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     if (!isOpen) return null;
 
@@ -154,7 +162,7 @@ export default function ExportPdfModal({ isOpen, onClose }: ExportPdfModalProps)
 
     // Use createPortal to render the modal outside the parent hierarchy (dropdown)
     return createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="card-glass w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
                 <div className="p-6 md:p-8 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/30">
                     <div>

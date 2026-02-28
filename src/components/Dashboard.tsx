@@ -8,7 +8,7 @@ type ViewMode = 'overview' | 'monthly' | 'yearly';
 
 export default function Dashboard() {
     const { state } = useApp();
-    const [viewMode, setViewMode] = useState<ViewMode>('overview');
+    const [viewMode, setViewMode] = useState<ViewMode>('monthly');
 
     // Default to the first active month if available, otherwise just use a placeholder or the first available month.
     // Ideally, we want the "Active Cycle" month.

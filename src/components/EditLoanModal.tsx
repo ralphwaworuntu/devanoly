@@ -100,7 +100,7 @@ export default function EditLoanModal({ transactionId, onClose }: EditLoanModalP
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-slate-900 rounded-2xl border border-slate-700 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
                 <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
                     <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/50 shrink-0">

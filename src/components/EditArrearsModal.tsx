@@ -88,7 +88,7 @@ export default function EditArrearsModal({ transactionId, onClose }: EditArrears
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
             <div className="card-glass w-full max-w-lg p-0 relative flex flex-col max-h-[90vh] overflow-hidden">
                 <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
                     <div className="p-6 border-b border-slate-700 shrink-0 flex justify-between items-center bg-slate-800/50">

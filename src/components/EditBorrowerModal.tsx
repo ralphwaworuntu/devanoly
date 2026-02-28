@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import { X, Save, User } from 'lucide-react';
@@ -15,6 +16,14 @@ export default function EditBorrowerModal({ borrowerId, onClose }: EditBorrowerM
 
     const [name, setName] = useState('');
     const [limit, setLimit] = useState('');
+
+    // Lock background scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     useEffect(() => {
         const borrower = state.borrowers.find(b => b.id === borrowerId);
@@ -41,8 +50,8 @@ export default function EditBorrowerModal({ borrowerId, onClose }: EditBorrowerM
         onClose();
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    return createPortal(
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl relative">
                 <button
                     onClick={onClose}
@@ -97,6 +106,7 @@ export default function EditBorrowerModal({ borrowerId, onClose }: EditBorrowerM
                     </form>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

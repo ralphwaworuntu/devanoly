@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import { X, Upload, FileSpreadsheet, CheckCircle2 } from 'lucide-react';
@@ -16,6 +17,14 @@ export default function ImportArrearsModal({ onClose }: ImportArrearsModalProps)
     const { showToast } = useToast();
     const [previewData, setPreviewData] = useState<any[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    // Lock background scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     const parseNum = (val: any) => {
         if (typeof val === 'number') return val;
@@ -112,8 +121,8 @@ export default function ImportArrearsModal({ onClose }: ImportArrearsModalProps)
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+    return createPortal(
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
             <div className="card-glass w-full max-w-2xl p-6 relative flex flex-col max-h-[90vh]">
                 <button
                     onClick={onClose}
@@ -194,6 +203,7 @@ export default function ImportArrearsModal({ onClose }: ImportArrearsModalProps)
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

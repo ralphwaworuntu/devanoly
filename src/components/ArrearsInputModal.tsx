@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import { Borrower } from '../types';
@@ -22,6 +23,14 @@ export default function ArrearsInputModal({ onClose }: ArrearsInputModalProps) {
     const [principal, setPrincipal] = useState('');
     const [totalDue, setTotalDue] = useState('');
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
+
+    // Lock background scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -95,8 +104,8 @@ export default function ArrearsInputModal({ onClose }: ArrearsInputModalProps) {
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+    return createPortal(
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
             <div className="card-glass w-full max-w-lg p-6 relative">
                 <button
                     onClick={onClose}
@@ -206,6 +215,7 @@ export default function ArrearsInputModal({ onClose }: ArrearsInputModalProps) {
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

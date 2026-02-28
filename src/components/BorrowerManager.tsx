@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import { Borrower, LoanTransaction } from '../types';
-import { Users, Plus, Trash2, Search, FileSpreadsheet, Edit2 } from 'lucide-react';
+import { Users, Plus, Trash2, Search, FileSpreadsheet, Edit2, ArrowUpDown } from 'lucide-react';
 import { formatCurrency } from '../utils/loanCalculator';
 import { generateId } from '../utils/idGenerator';
 import ExcelImportModal from './ExcelImportModal';
@@ -20,6 +20,7 @@ export default function BorrowerManager() {
     const [search, setSearch] = useState('');
     const [showImportModal, setShowImportModal] = useState(false);
     const [editBorrowerId, setEditBorrowerId] = useState<string | null>(null);
+    const [sortConfig, setSortConfig] = useState<'name-asc' | 'name-desc'>('name-asc');
     const [confirmModal, setConfirmModal] = useState<{
         isOpen: boolean;
         title: string;
@@ -48,7 +49,13 @@ export default function BorrowerManager() {
 
     const filteredBorrowers = state.borrowers.filter((b: Borrower) =>
         b.name.toLowerCase().includes(search.toLowerCase())
-    );
+    ).sort((a: Borrower, b: Borrower) => {
+        if (sortConfig === 'name-asc') {
+            return a.name.localeCompare(b.name);
+        } else {
+            return b.name.localeCompare(a.name);
+        }
+    });
 
     return (
         <div className="space-y-6">
@@ -103,15 +110,31 @@ export default function BorrowerManager() {
                         <Users size={20} className="text-purple-400" />
                         Database Peminjam ({filteredBorrowers.length})
                     </h3>
-                    <div className="relative">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <input
-                            type="text"
-                            placeholder="Cari nama..."
-                            className="input-field pl-9 py-1.5 text-sm"
-                            value={search}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-                        />
+                    <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+                        {/* Sort Filter */}
+                        <div className="relative">
+                            <ArrowUpDown size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <select
+                                value={sortConfig}
+                                onChange={(e) => setSortConfig(e.target.value as 'name-asc' | 'name-desc')}
+                                className="input-field pl-9 py-1.5 text-sm appearance-none cursor-pointer"
+                            >
+                                <option value="name-asc">Nama (A-Z)</option>
+                                <option value="name-desc">Nama (Z-A)</option>
+                            </select>
+                        </div>
+
+                        {/* Search Box */}
+                        <div className="relative flex-1 md:flex-none">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <input
+                                type="text"
+                                placeholder="Cari nama..."
+                                className="input-field pl-9 py-1.5 text-sm w-full"
+                                value={search}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+                            />
+                        </div>
                     </div>
                 </div>
 

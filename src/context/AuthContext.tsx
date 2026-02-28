@@ -1,49 +1,63 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User } from '../types';
 
-// Demo credentials
-const DEMO_ACCOUNTS = [
-    { username: 'admin', password: 'admin123', role: 'admin' as const }
-];
+// Default credentials if not set in localStorage
+const DEFAULT_USERNAME = 'admin';
+const DEFAULT_PASSWORD = '123';
+
+const STORAGE_KEY_CREDS = 'wp-admin-credentials';
+const STORAGE_KEY_SESSION = 'wp-auth-session';
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     login: (username: string, password: string) => { success: boolean; error?: string };
     logout: () => void;
+    updateCredentials: (oldPw: string, newUsername: string, newPw?: string) => { success: boolean; error?: string };
 }
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
     isAuthenticated: false,
     login: () => ({ success: false }),
-    logout: () => { }
+    logout: () => { },
+    updateCredentials: () => ({ success: false, error: 'Not implemented' })
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
 
-    // Load session from localStorage
-    useEffect(() => {
-        const saved = localStorage.getItem('wp-auth-session');
+    // Load credentials from localStorage
+    const getCredentials = () => {
+        const saved = localStorage.getItem(STORAGE_KEY_CREDS);
         if (saved) {
+            try { return JSON.parse(saved); } catch { }
+        }
+        return { username: DEFAULT_USERNAME, password: DEFAULT_PASSWORD, role: 'admin' };
+    };
+
+    // Load session from sessionStorage (cleared on tab close)
+    useEffect(() => {
+        // Migration: If they had old localStorage session, maybe clear it or migrate to session
+        localStorage.removeItem('wp-auth-session'); // Force remove old local storage session
+
+        const savedSession = sessionStorage.getItem(STORAGE_KEY_SESSION);
+        if (savedSession) {
             try {
-                setUser(JSON.parse(saved));
+                setUser(JSON.parse(savedSession));
             } catch {
-                localStorage.removeItem('wp-auth-session');
+                sessionStorage.removeItem(STORAGE_KEY_SESSION);
             }
         }
     }, []);
 
     const login = useCallback((username: string, password: string) => {
-        const account = DEMO_ACCOUNTS.find(
-            (a) => a.username === username && a.password === password
-        );
+        const creds = getCredentials();
 
-        if (account) {
-            const userData: User = { username: account.username, role: account.role };
+        if (creds.username === username && creds.password === password) {
+            const userData: User = { username: creds.username, role: creds.role as 'admin' };
             setUser(userData);
-            localStorage.setItem('wp-auth-session', JSON.stringify(userData));
+            sessionStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(userData));
             return { success: true };
         }
 
@@ -52,11 +66,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = useCallback(() => {
         setUser(null);
-        localStorage.removeItem('wp-auth-session');
+        sessionStorage.removeItem(STORAGE_KEY_SESSION);
     }, []);
 
+    const updateCredentials = useCallback((oldPw: string, newUsername: string, newPw?: string) => {
+        const creds = getCredentials();
+        if (creds.password !== oldPw) {
+            return { success: false, error: 'Password lama salah!' };
+        }
+
+        const newCreds = {
+            ...creds,
+            username: newUsername || creds.username,
+            password: newPw || creds.password
+        };
+        localStorage.setItem(STORAGE_KEY_CREDS, JSON.stringify(newCreds));
+
+        // Update current session if they changed username
+        if (user && newUsername && newUsername !== user.username) {
+            const updatedUser = { ...user, username: newUsername };
+            setUser(updatedUser);
+            sessionStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(updatedUser));
+        }
+
+        return { success: true };
+    }, [user]);
+
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, updateCredentials }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import { LoanTransaction } from '../types';
@@ -19,6 +20,14 @@ export default function PaymentModal({ transactionId, onClose }: PaymentModalPro
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Default Today
     const [note, setNote] = useState('');
+
+    // Lock background scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     const transaction = state.transactions.find((t: LoanTransaction) => t.id === transactionId);
     if (!transaction) return null;
@@ -49,8 +58,8 @@ export default function PaymentModal({ transactionId, onClose }: PaymentModalPro
         onClose();
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    return createPortal(
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
             <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200">
                 <button
                     onClick={onClose}
@@ -195,6 +204,7 @@ export default function PaymentModal({ transactionId, onClose }: PaymentModalPro
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

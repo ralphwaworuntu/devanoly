@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Settings, Calendar, Percent, UploadCloud, Link, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Settings, Calendar, Percent, UploadCloud, Link, X, Lock, Key, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function SetupPanel() {
     const { state, dispatch } = useApp();
     const { config } = state;
+    const { user, updateCredentials } = useAuth();
+
+    // Credentials change state
+    const [oldPassword, setOldPassword] = useState('');
+    const [newUsername, setNewUsername] = useState(user?.username || 'admin');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordSuccess, setPasswordSuccess] = useState(false);
 
     // Helper to Sort Months Chronologically
     const sortMonths = (months: string[]) => {
@@ -24,6 +34,46 @@ export default function SetupPanel() {
     };
 
     const sortedAvailableMonths = sortMonths(config.availableMonths || []);
+
+    const handleCredentialsChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        setPasswordError('');
+        setPasswordSuccess(false);
+
+        if (!oldPassword) {
+            setPasswordError('Password lama harus diisi untuk konfirmasi!');
+            return;
+        }
+
+        if (!newUsername.trim()) {
+            setPasswordError('Username baru tidak boleh kosong!');
+            return;
+        }
+
+        if (newPassword || confirmPassword) {
+            if (newPassword !== confirmPassword) {
+                setPasswordError('Password baru dan konfirmasi tidak cocok!');
+                return;
+            }
+
+            if (newPassword.length < 3) {
+                setPasswordError('Password baru minimal 3 karakter!');
+                return;
+            }
+        }
+
+        const result = updateCredentials(oldPassword, newUsername.trim(), newPassword);
+
+        if (result.success) {
+            setPasswordSuccess(true);
+            setOldPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+            setTimeout(() => setPasswordSuccess(false), 3000);
+        } else {
+            setPasswordError(result.error || 'Terjadi kesalahan');
+        }
+    };
 
     return (
         <div className="card-glass p-6">
@@ -321,6 +371,95 @@ export default function SetupPanel() {
                             </div>
                         ))}
                     </div>
+                </div>
+
+                {/* Security Settings: Change Credentials */}
+                <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-900/5 space-y-4">
+                    <h4 className="font-bold text-rose-400 flex items-center gap-2">
+                        <ShieldCheck size={20} />
+                        Pengaturan Akses & Keamanan
+                    </h4>
+                    <p className="text-xs text-slate-500">Ganti username atau password akses Administrator. Password lama wajib diisi.</p>
+
+                    <form onSubmit={handleCredentialsChange} className="space-y-3 mt-2">
+                        {passwordError && (
+                            <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs p-2 rounded flex items-center gap-2">
+                                <AlertCircle size={14} />
+                                <span>{passwordError}</span>
+                            </div>
+                        )}
+                        {passwordSuccess && (
+                            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs p-2 rounded flex items-center gap-2">
+                                <ShieldCheck size={14} />
+                                <span>Kredensial berhasil diperbarui!</span>
+                            </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <label className="text-slate-400 text-xs uppercase font-bold">Username Baru</label>
+                                <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700 px-3 py-2 rounded-lg focus-within:border-emerald-500/50 transition-colors">
+                                    <ShieldCheck size={16} className="text-emerald-500" />
+                                    <input
+                                        type="text"
+                                        value={newUsername}
+                                        onChange={e => setNewUsername(e.target.value)}
+                                        className="bg-transparent border-none focus:ring-0 text-slate-200 w-full text-sm"
+                                        placeholder="Username"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-slate-400 text-xs uppercase font-bold mt-1 md:mt-0">Password Lama (Wajib)</label>
+                                <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700 px-3 py-2 rounded-lg focus-within:border-rose-500/50 transition-colors">
+                                    <Lock size={16} className="text-rose-400" />
+                                    <input
+                                        type="password"
+                                        value={oldPassword}
+                                        onChange={e => setOldPassword(e.target.value)}
+                                        className="bg-transparent border-none focus:ring-0 text-slate-200 w-full text-sm"
+                                        placeholder="Masukkan password lama"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <label className="text-slate-400 text-xs uppercase font-bold">Password Baru (Opsional)</label>
+                                <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700 px-3 py-2 rounded-lg focus-within:border-blue-500/50 transition-colors">
+                                    <Key size={16} className="text-blue-500" />
+                                    <input
+                                        type="password"
+                                        value={newPassword}
+                                        onChange={e => setNewPassword(e.target.value)}
+                                        className="bg-transparent border-none focus:ring-0 text-slate-200 w-full text-sm"
+                                        placeholder="Kosongkan jika tidak diubah"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-slate-400 text-xs uppercase font-bold">Konfirmasi Password Baru</label>
+                                <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700 px-3 py-2 rounded-lg focus-within:border-blue-500/50 transition-colors">
+                                    <Key size={16} className="text-slate-500" />
+                                    <input
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={e => setConfirmPassword(e.target.value)}
+                                        className="bg-transparent border-none focus:ring-0 text-slate-200 w-full text-sm"
+                                        placeholder="Ulangi password baru"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-end pt-2">
+                            <button
+                                type="submit"
+                                className="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-rose-500/20 transition-all flex items-center gap-2"
+                            >
+                                <Lock size={16} />
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

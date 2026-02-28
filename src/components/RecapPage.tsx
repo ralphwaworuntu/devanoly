@@ -2,13 +2,14 @@ import { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { LoanTransaction } from '../types';
 import { formatCurrency } from '../utils/loanCalculator';
-import { FileText, TrendingUp, Wallet, Calendar, Users, Filter } from 'lucide-react';
+import { FileText, TrendingUp, Wallet, Calendar, Users, Filter, ArrowUpDown } from 'lucide-react';
 
 
 
 export default function RecapPage() {
     const { state } = useApp();
     const [selectedMonth, setSelectedMonth] = useState<string>('Semua Waktu');
+    const [sortConfig, setSortConfig] = useState<'name-asc' | 'name-desc' | 'profit-desc' | 'profit-asc'>('name-asc');
 
     // Filter transactions based on selected month
     const filteredTransactions = useMemo(() => {
@@ -104,8 +105,19 @@ export default function RecapPage() {
             if (t.status !== 'Lunas') s.activeLoans++;
         });
 
-        return Object.values(stats);
-    }, [state.transactions]);
+        return Object.values(stats).sort((a, b) => {
+            if (sortConfig === 'name-asc') {
+                return a.name.localeCompare(b.name);
+            } else if (sortConfig === 'name-desc') {
+                return b.name.localeCompare(a.name);
+            } else if (sortConfig === 'profit-desc') {
+                return b.totalProfit - a.totalProfit;
+            } else if (sortConfig === 'profit-asc') {
+                return a.totalProfit - b.totalProfit;
+            }
+            return 0;
+        });
+    }, [state.transactions, sortConfig]);
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -175,9 +187,25 @@ export default function RecapPage() {
 
             {/* Borrower Stats Table */}
             <div className="card-glass overflow-hidden">
-                <div className="p-6 border-b border-slate-700/50">
-                    <h3 className="text-lg font-bold">Statistik Peminjam</h3>
-                    <p className="text-sm text-slate-400">Rincian aktivitas per nasabah</p>
+                <div className="p-6 border-b border-slate-700/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h3 className="text-lg font-bold">Statistik Peminjam</h3>
+                        <p className="text-sm text-slate-400">Rincian aktivitas per nasabah</p>
+                    </div>
+                    {/* Sort Dropdown */}
+                    <div className="relative w-full md:w-auto">
+                        <ArrowUpDown size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                        <select
+                            value={sortConfig}
+                            onChange={(e) => setSortConfig(e.target.value as any)}
+                            className="bg-slate-800 text-slate-200 text-sm font-semibold pl-9 pr-8 py-2 w-full rounded-xl border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer appearance-none hover:bg-slate-700 transition-colors"
+                        >
+                            <option value="name-asc">Nama (A-Z)</option>
+                            <option value="name-desc">Nama (Z-A)</option>
+                            <option value="profit-desc">Profit (Tinggi ke Rendah)</option>
+                            <option value="profit-asc">Profit (Rendah ke Tinggi)</option>
+                        </select>
+                    </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">

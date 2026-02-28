@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
-import { LayoutDashboard, Users, Calculator, Settings, Menu, X, LogOut, Database, FileText, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Users, Calculator, Settings, Menu, X, LogOut, Database, FileText, AlertCircle, CheckSquare } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import SetupPanel from './components/SetupPanel';
 import BorrowerManager from './components/BorrowerManager';
@@ -11,9 +11,10 @@ import RecapPage from './components/RecapPage';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import DatabaseManager from './components/DatabaseManager';
+import MarkAsPaidPage from './components/MarkAsPaidPage';
 
 type Page = 'landing' | 'login' | 'dashboard';
-type Tab = 'dashboard' | 'input' | 'borrowers' | 'recap' | 'config' | 'database' | 'arrears';
+type Tab = 'dashboard' | 'input' | 'markPaid' | 'borrowers' | 'recap' | 'config' | 'database' | 'arrears';
 
 function App() {
     const { state } = useApp();
@@ -65,6 +66,12 @@ function App() {
                 return (
                     <div key="input" className="animate-in slide-in-from-bottom-4 duration-500">
                         <LoanForm />
+                    </div>
+                );
+            case 'markPaid':
+                return (
+                    <div key="markPaid" className="animate-in slide-in-from-bottom-4 duration-500">
+                        <MarkAsPaidPage />
                     </div>
                 );
             case 'borrowers':
@@ -230,6 +237,15 @@ function App() {
                         isCollapsed={isSidebarCollapsed}
                     />
                     <NavItem
+                        icon={<CheckSquare size={18} />}
+                        label="Tandai Lunas"
+                        isActive={activeTab === 'markPaid'}
+                        onClick={() => { setActiveTab('markPaid'); closeMobileMenu(); }}
+                        activeClass={theme.navActive}
+                        iconClass={theme.navIconInfo}
+                        isCollapsed={isSidebarCollapsed}
+                    />
+                    <NavItem
                         icon={<AlertCircle size={18} />}
                         label="Data Tunggakan"
                         isActive={activeTab === 'arrears'}
@@ -313,6 +329,7 @@ function App() {
                             {activeTab === 'dashboard' && 'Dashboard Overview'}
                             {activeTab === 'arrears' && 'Manajemen Tunggakan'}
                             {activeTab === 'input' && 'Input Transaksi Baru'}
+                            {activeTab === 'markPaid' && 'Tandai Lunas Cepat'}
                             {activeTab === 'borrowers' && 'Database Peminjam'}
                             {activeTab === 'recap' && 'Rekapan Laporan'}
                             {activeTab === 'config' && 'Konfigurasi Sistem'}
@@ -322,6 +339,7 @@ function App() {
                             {activeTab === 'dashboard' && 'Ringkasan performa portofolio dan aktivitas pinjaman bulan ini.'}
                             {activeTab === 'arrears' && 'Pantau dan kelola penagihan pinjaman yang melewati jatuh tempo.'}
                             {activeTab === 'input' && 'Form pencatatan pinjaman baru dengan kalkulasi bunga otomatis.'}
+                            {activeTab === 'markPaid' && 'Tandai pinjaman aktif sebagai lunas dengan mudah dan cepat.'}
                             {activeTab === 'borrowers' && 'Kelola data lengkap nasabah dan limit kredit mereka.'}
                             {activeTab === 'recap' && 'Analisis mendalam mengenai profitabilitas dan arus kas.'}
                             {activeTab === 'config' && 'Sesuaikan parameter aplikasi, bunga, dan siklus penagihan.'}
